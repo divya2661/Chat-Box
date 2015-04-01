@@ -8,23 +8,28 @@ window.onload = function()
     var name = document.getElementById("name");
     var add_people = document.getElementById("add_people");
     var add = document.getElementById("add");
-    var users = document.getElementById("users")
+    var users = document.getElementById("users");
+    var  rm = document.getElementById("room");
 
 
-    
-    socket.on('connect',function(){
+
+        socket.on('connect',function(){
         socket.emit('adduser',prompt("what is your name?"));
     });
 
 
     socket.on('updateusers', function(data) {
+
         $(users).empty();
-        $.each(data, function(key, value) {
-            var div = key;
-            $(users).append('<div>' + key + '</div>');
+        $.each(data, function(key) {
+            
+            $(users).append('<div><a href = "#" onclick = "alertuser(\''+key+'\')">' + key + '</a></div>');
         });
     });
 
+    function alertuser(user){
+        console.log("I think this should work...");
+    }
 
     socket.on('message',function(data){
 
@@ -45,8 +50,34 @@ window.onload = function()
         }
     });
 
+    socket.on('updateRoom',function(rooms,current_room){
 
-    sendButton.onclick = sendMessage = function(){
+        $(rm).empty();
+        $.each(rooms,function(key,value){
+            console.log("key is: "+key);
+            console.log("value is: "+value);
+            if(value==current_room){
+                $(rm).append('<div>' + value + '</div>');
+            }
+            else
+            {
+                $(rm).append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+                console.log("its fine..............");
+            }
+        });
+
+
+    });
+    function switchRoom(room){
+        console.log("its fine..............11111");
+        socket.emit('switchRoom', room);
+    }
+
+
+//--------------------------------FUNCTIONS------------------------------------
+
+
+sendButton.onclick = sendMessage = function(){
         if(name.value == "")
         {
             alert("please type your name!");
@@ -54,10 +85,15 @@ window.onload = function()
         else
         {
             var text = field.value;
+           // console.log('lolllllllll' + socket.name);
             socket.emit('send',{message: text,username: name.value});
             field.value = "";
         }
     };
+
+    
+
+
 
     $(document).ready(function() {
         $("#field").keyup(function(e) {
